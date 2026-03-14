@@ -808,27 +808,28 @@ function bindDropdownMenus() {
   });
 }
 
-function updateTimeTogether() {
-  const start = new Date(RELATIONSHIP_START_DATE);
+function updateTimer(startDate, prefix) {
+  const start = new Date(startDate);
   const now = new Date();
-  if (Number.isNaN(start.getTime()) || now < start) {
-    return;
-  }
+
+  if (Number.isNaN(start.getTime()) || now < start) return;
 
   const result = getCalendarDiff(start, now);
-  setText("years", result.years);
-  setText("months", result.months);
-  setText("days", result.days);
-  setText("hours", result.hours);
-  setText("minutes", result.minutes);
-  setText("seconds", result.seconds);
+
+  setText(`${prefix}-years`, result.years);
+  setText(`${prefix}-months`, result.months);
+  setText(`${prefix}-days`, result.days);
+  setText(`${prefix}-hours`, result.hours);
+  setText(`${prefix}-minutes`, result.minutes);
+  setText(`${prefix}-seconds`, result.seconds);
 
   const startDateText = start.toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric"
   });
-  setText("start-date-text", `Counting from ${startDateText}`);
+
+  setText(`${prefix}-start-date-text`, `Counting from ${startDateText}`);
 }
 
 function getCalendarDiff(start, end) {
@@ -836,8 +837,9 @@ function getCalendarDiff(start, end) {
 
   let years = end.getFullYear() - cursor.getFullYear();
   cursor.setFullYear(cursor.getFullYear() + years);
+
   if (cursor > end) {
-    years -= 1;
+    years--;
     cursor.setFullYear(cursor.getFullYear() - 1);
   }
 
@@ -845,15 +847,15 @@ function getCalendarDiff(start, end) {
   while (months < 12) {
     const nextMonth = new Date(cursor);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
+
     if (nextMonth <= end) {
-      months += 1;
+      months++;
       cursor.setTime(nextMonth.getTime());
-    } else {
-      break;
-    }
+    } else break;
   }
 
   const msLeft = end - cursor;
+
   const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
   const hours = Math.floor((msLeft / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((msLeft / (1000 * 60)) % 60);
@@ -864,10 +866,17 @@ function getCalendarDiff(start, end) {
 
 function setText(id, value) {
   const node = document.getElementById(id);
-  if (node) {
-    node.textContent = String(value);
-  }
+  if (node) node.textContent = String(value);
+
+  const RELATIONSHIP_START_DATE = "2025-09-17";
+const TIME_SPENT_START_DATE = "2025-08-17";
+
+setInterval(() => {
+  updateTimer(RELATIONSHIP_START_DATE, "rel");
+  updateTimer(TIME_SPENT_START_DATE, "spent");
+}, 1000);
 }
+
 
 function bindReasonSliders() {
   restoreSliderState();
